@@ -40,11 +40,32 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({
   const [submittedPayload, setSubmittedPayload] = useState<PredictionPayload | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [inlineUrl, setInlineUrl] = useState('');
+  const [savingInline, setSavingInline] = useState(false);
 
   // Fetch features on mount
   useEffect(() => {
     fetchFeatures();
+    // Pre-populate inlineUrl from current stored config
+    api.getConfig().then((cfg) => {
+      if (cfg.mlApiUrl) setInlineUrl(cfg.mlApiUrl);
+    }).catch(() => {});
   }, []);
+
+  const handleInlineConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inlineUrl.trim()) return;
+    setSavingInline(true);
+    setFeaturesError(null);
+    try {
+      await api.setConfig(inlineUrl.trim());
+      await fetchFeatures();
+    } catch (err: any) {
+      setFeaturesError(err.message || 'Failed to connect to backend URL');
+    } finally {
+      setSavingInline(false);
+    }
+  };
 
   const fetchFeatures = async () => {
     setLoadingFeatures(true);
@@ -281,31 +302,81 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({
 
       {/* Features Error State */}
       {!loadingFeatures && featuresError && (
-        <div className="p-8 bg-white rounded-3xl border border-rose-200 shadow-sm space-y-4 text-center">
-          <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
-            <AlertCircle className="w-6 h-6" />
+        <div className="p-6 sm:p-8 bg-white rounded-3xl border border-rose-200 shadow-sm space-y-5 animate-fadeIn">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 sm:space-x-4 text-center sm:text-left">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-bold text-slate-900 text-base">
+                FastAPI Backend Not Connected or Reached
+              </h3>
+              <p className="text-xs text-rose-700 leading-relaxed font-mono">
+                {featuresError}
+              </p>
+            </div>
           </div>
-          <div className="space-y-1 max-w-lg mx-auto">
-            <h3 className="font-bold text-slate-900 text-base">
-              Could Not Fetch Model Features
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              {featuresError}
+
+          {/* Quick Connect URL Input Box */}
+          <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <label htmlFor="quick-url-input" className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Connect FastAPI Backend (e.g. from Google Colab / Ngrok)
+              </label>
+              <span className="text-[11px] text-blue-600 font-medium">Saved in browser & server</span>
+            </div>
+            <form onSubmit={handleInlineConnect} className="flex flex-col sm:flex-row gap-2.5">
+              <input
+                id="quick-url-input"
+                type="text"
+                value={inlineUrl}
+                onChange={(e) => setInlineUrl(e.target.value)}
+                placeholder="https://your-ngrok-tunnel.ngrok-free.dev or http://localhost:8000"
+                className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs text-slate-900 bg-white"
+              />
+              <button
+                type="submit"
+                disabled={savingInline || !inlineUrl.trim()}
+                className="inline-flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all disabled:opacity-60 cursor-pointer"
+              >
+                {savingInline ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>Connect & Load Features</span>
+                  </>
+                )}
+              </button>
+            </form>
+            <p className="text-[11px] text-slate-500">
+              Paste your active Colab ngrok tunnel URL above. The app will immediately introspect your model's 27 features and enable live XGBoost inference.
             </p>
           </div>
-          <div className="pt-2 flex items-center justify-center space-x-3">
-            <button
-              onClick={fetchFeatures}
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors cursor-pointer"
-            >
-              Retry GET /features
-            </button>
-            <button
-              onClick={onOpenConnectionModal}
-              className="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium transition-colors cursor-pointer"
-            >
-              Configure ML_API_URL
-            </button>
+
+          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
+            <span className="text-xs text-slate-500">
+              Want to set it permanently on Vercel? Add <code className="font-mono bg-slate-100 px-1 py-0.5 rounded text-slate-800">ML_API_URL</code> in Vercel Project Settings.
+            </span>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={fetchFeatures}
+                className="px-3.5 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+              >
+                Retry GET /features
+              </button>
+              <button
+                type="button"
+                onClick={onOpenConnectionModal}
+                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition-colors cursor-pointer"
+              >
+                Connection Modal
+              </button>
+            </div>
           </div>
         </div>
       )}
