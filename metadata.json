@@ -1,0 +1,6 @@
+{
+  "name": "Late Delivery Prediction System",
+  "description": "Production Machine Learning web platform connected to an XGBoost FastAPI service for real-time shipment delay risk forecasting and model evaluation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
