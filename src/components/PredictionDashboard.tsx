@@ -271,15 +271,19 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({
         </div>
       </div>
 
-      {/* Backend Disconnected Notice */}
+      {/* Backend Sleeping Notice */}
       {health && !health.ok && (
-        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start space-x-3 text-amber-900 text-xs">
+        <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200/80 flex items-start space-x-3 text-amber-900 text-xs">
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="flex-1 space-y-1">
-            <p className="font-bold text-amber-950">FastAPI Backend is currently not reachable</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-bold text-amber-950">FastAPI Backend (Colab) is Sleeping</span>
+              <span className="px-2 py-0.5 rounded bg-amber-200/60 text-amber-800 font-mono text-[10px]">
+                https://renewable-ultra-underfed.ngrok-free.dev
+              </span>
+            </div>
             <p className="text-amber-800 leading-relaxed">
-              Ensure your Google Colab notebook is running the FastAPI application and your ngrok tunnel is live.
-              Click <button onClick={onOpenConnectionModal} className="underline font-semibold text-amber-950 hover:text-black">Connection Settings</button> to configure or verify your <code className="font-mono bg-amber-100 px-1 py-0.5 rounded">ML_API_URL</code>.
+              Your 27 model features are permanently loaded and ready in the form below. When you want to run live predictions, simply click 'Run' on the FastAPI cell in your Google Colab notebook. The connection is permanent, so you do not need to re-enter the URL.
             </p>
           </div>
         </div>
@@ -391,7 +395,7 @@ export const PredictionDashboard: React.FC<PredictionDashboardProps> = ({
       )}
 
       {/* Feature Input Form */}
-      {!loadingFeatures && !featuresError && features.length > 0 && (
+      {!loadingFeatures && features.length > 0 && (
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"

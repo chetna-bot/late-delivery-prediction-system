@@ -53,6 +53,16 @@ export default async function handler(req: any, res: any) {
     clearTimeout(timeout);
 
     const text = await backendRes.text();
+
+    if (backendRes.status === 404 || text.includes('ERR_NGROK_3200') || text.includes('is offline')) {
+      res.status(503).json({
+        error: 'Your Google Colab notebook is currently sleeping (ngrok tunnel offline). To execute live XGBoost predictions, re-run the FastAPI cell in your Google Colab notebook. The URL is permanent (https://renewable-ultra-underfed.ngrok-free.dev) so no configuration changes are needed.',
+        isColabSleeping: true,
+        targetUrl,
+      });
+      return;
+    }
+
     let data: any;
     try {
       data = JSON.parse(text);
@@ -62,7 +72,7 @@ export default async function handler(req: any, res: any) {
 
     if (!backendRes.ok) {
       res.status(backendRes.status).json({
-        error: `FastAPI /predict returned HTTP ${backendRes.status}`,
+        error: `FastAPI model error (HTTP ${backendRes.status})`,
         details: data,
         targetUrl,
       });
@@ -75,7 +85,7 @@ export default async function handler(req: any, res: any) {
     res.status(502).json({
       error: isTimeout
         ? 'Inference request timed out after 20s. Check your Colab GPU/CPU execution.'
-        : `Failed to connect to FastAPI /predict: ${err.message}`,
+        : `Could not reach Colab FastAPI backend: ${err.message}. If your Colab tab slept, run the cell in Colab to wake it up.`,
       targetUrl,
     });
   }

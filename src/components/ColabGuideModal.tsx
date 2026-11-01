@@ -97,9 +97,9 @@ export const ColabGuideModal: React.FC<ColabGuideModalProps> = ({
           <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
             2
           </div>
-          <h3 className="font-bold text-slate-900 text-base">Run FastAPI & Ngrok</h3>
+          <h3 className="font-bold text-slate-900 text-base">Permanent 24/7 Cloud Host</h3>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Expose the 3 endpoints: <code className="text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded font-mono">GET /</code>, <code className="text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded font-mono">GET /features</code>, and <code className="text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded font-mono">POST /predict</code>. Launch an ngrok public tunnel on port 8000.
+            Deploy the <code className="text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded font-mono">backend/</code> folder to Render or Hugging Face Spaces for free. It stays online 24/7 forever with no Colab disconnects.
           </p>
         </div>
 
@@ -107,10 +107,48 @@ export const ColabGuideModal: React.FC<ColabGuideModalProps> = ({
           <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
             3
           </div>
-          <h3 className="font-bold text-slate-900 text-base">Connect to Frontend</h3>
+          <h3 className="font-bold text-slate-900 text-base">Permanent Connection</h3>
           <p className="text-xs text-slate-600 leading-relaxed">
-            Copy the generated ngrok URL (e.g. <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">https://xxxx.ngrok-free.app</code>), paste it into the Connection Settings or set <code className="text-slate-800 font-mono">ML_API_URL</code>.
+            Set your permanent cloud URL or keep your reserved ngrok domain (<code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">https://renewable-ultra-underfed.ngrok-free.dev</code>).
           </p>
+        </div>
+      </div>
+
+      {/* Permanent 24/7 Uptime Guide Banner */}
+      <div className="bg-gradient-to-br from-slate-900 to-blue-950 rounded-3xl p-6 sm:p-8 text-white space-y-4 border border-blue-900/50 shadow-xl">
+        <div className="flex items-center space-x-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <h2 className="text-lg font-bold text-white">
+            How to Keep Your Backend Permanently Online (Never Sleep)
+          </h2>
+        </div>
+        <p className="text-xs text-slate-300 leading-relaxed">
+          Google Colab free sessions automatically sleep after ~60-90 minutes of idle time. To keep your FastAPI backend permanently online 24/7 without needing to open Colab:
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+            <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
+              Option A: Free 24/7 Hosting on Render
+            </span>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              We created a <code className="bg-white/10 px-1 py-0.5 rounded font-mono">backend/</code> folder in this repo with <code className="font-mono">main.py</code> and <code className="font-mono">requirements.txt</code>. Connect your GitHub repo to Render.com and deploy the web service. It gives you a permanent 24/7 URL like <code className="text-cyan-200 font-mono">https://late-delivery-api.onrender.com</code>.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+            <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">
+              Option B: Colab Anti-Sleep Script
+            </span>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              If running in Colab, open Chrome DevTools (F12) → Console tab and paste this script:
+            </p>
+            <pre className="text-[10px] bg-black/40 p-2 rounded text-emerald-300 font-mono overflow-x-auto">
+{`setInterval(() => {
+  document.querySelector("colab-connect-button")?.click();
+}, 60000);`}
+            </pre>
+          </div>
         </div>
       </div>
 

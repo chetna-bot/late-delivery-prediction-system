@@ -52,6 +52,19 @@ export default async function handler(req: any, res: any) {
 
     const latencyMs = Date.now() - startTime;
     const text = await backendRes.text();
+
+    if (backendRes.status === 404 || text.includes('ERR_NGROK_3200') || text.includes('is offline')) {
+      res.status(200).json({
+        ok: false,
+        status: 404,
+        isColabSleeping: true,
+        error: 'Google Colab notebook is sleeping. Run the uvicorn cell in your Colab tab to wake it up.',
+        targetUrl,
+        latencyMs,
+      });
+      return;
+    }
+
     let data: any;
     try {
       data = JSON.parse(text);
@@ -85,7 +98,7 @@ export default async function handler(req: any, res: any) {
     res.status(502).json({
       ok: false,
       error: isTimeout
-        ? 'Connection timed out after 12s. Check if your Colab notebook is active.'
+        ? 'Connection timed out. Check if your Colab notebook is running.'
         : (err.message || 'Failed to reach FastAPI backend'),
       targetUrl,
       latencyMs,
