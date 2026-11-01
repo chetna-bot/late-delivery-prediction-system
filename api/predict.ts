@@ -1,18 +1,38 @@
-import { getTargetUrl, handleCors, parseBackendResponse } from './_utils';
+const DEFAULT_ML_API_URL = 'https://renewable-ultra-underfed.ngrok-free.dev';
+
+function getTargetUrl(req: any): string {
+  const fromHeader = req?.headers?.['x-ml-api-url'];
+  if (typeof fromHeader === 'string' && fromHeader.trim()) {
+    return cleanUrl(fromHeader);
+  }
+  const fromEnv = process.env.ML_API_URL;
+  if (typeof fromEnv === 'string' && fromEnv.trim()) {
+    return cleanUrl(fromEnv);
+  }
+  return DEFAULT_ML_API_URL;
+}
+
+function cleanUrl(url: string): string {
+  let cleaned = (url || '').trim();
+  if (!cleaned) return DEFAULT_ML_API_URL;
+  if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+    cleaned = 'https://' + cleaned;
+  }
+  return cleaned.replace(/\/+$/, '');
+}
 
 export default async function handler(req: any, res: any) {
-  if (handleCors(req, res)) return;
-
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Content-Type', 'application/json');
 
-  const targetUrl = getTargetUrl(req);
-  if (!targetUrl) {
-    res.status(400).json({
-      error: 'ML_API_URL is not configured yet. Please configure ML_API_URL in Vercel Project Settings or enter your Colab ngrok URL in Connection Settings.',
-      code: 'NO_URL_CONFIGURED',
-    });
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
     return;
   }
+
+  const targetUrl = getTargetUrl(req);
 
   try {
     const controller = new AbortController();
@@ -33,11 +53,16 @@ export default async function handler(req: any, res: any) {
     clearTimeout(timeout);
 
     const text = await backendRes.text();
-    const { data, cleanError } = parseBackendResponse(text, backendRes.status);
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { raw: text.slice(0, 500) };
+    }
 
     if (!backendRes.ok) {
       res.status(backendRes.status).json({
-        error: cleanError || `ML Backend returned HTTP ${backendRes.status}`,
+        error: `FastAPI /predict returned HTTP ${backendRes.status}`,
         details: data,
         targetUrl,
       });

@@ -1,9 +1,13 @@
-import { handleCors } from './_utils';
-
 export default async function handler(req: any, res: any) {
-  if (handleCors(req, res)) return;
-
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Content-Type', 'application/json');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
 
   const template = `# ==========================================================
 # Google Colab FastAPI Backend for Late Delivery Prediction

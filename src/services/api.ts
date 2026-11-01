@@ -7,14 +7,17 @@ import {
   ConfigResponse,
 } from '../types';
 
+const DEFAULT_ML_API_URL = 'https://renewable-ultra-underfed.ngrok-free.dev';
 const URL_STORAGE_KEY = 'ml_backend_api_url';
 
 export function getStoredUrl(): string {
   try {
-    return (localStorage.getItem(URL_STORAGE_KEY) || '').trim();
+    const stored = localStorage.getItem(URL_STORAGE_KEY);
+    if (stored && stored.trim()) return stored.trim();
   } catch {
-    return '';
+    // ignore
   }
+  return DEFAULT_ML_API_URL;
 }
 
 export function setStoredUrl(url: string) {
